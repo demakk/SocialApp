@@ -7,4 +7,21 @@
         <RootNamespace>Social.Application</RootNamespace>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
+      <PackageReference Include="MediatR" Version="11.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Posts\CommandHandlers" />
+      <Folder Include="Posts\Commands" />
+      <Folder Include="Posts\Queries" />
+      <Folder Include="Posts\QueryHandlers" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\SocialApp.Dal\SocialApp.Dal.csproj" />
+      <ProjectReference Include="..\SocialApp.Domain\SocialApp.Domain.csproj" />
+    </ItemGroup>
+
 </Project>
