@@ -8,6 +8,6 @@ internal class UserProfileMap : Profile
 {
     public UserProfileMap()
     {
-        CreateMap<CreateUserCommand, BasicInfo>();
+        //CreateMap<CreateUserCommand, BasicInfo>();
     }
 }
