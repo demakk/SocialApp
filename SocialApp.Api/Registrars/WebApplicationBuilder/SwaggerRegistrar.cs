@@ -1,10 +1,10 @@
 ﻿using SocialApp.Options;
 
-namespace SocialApp.Registrars;
+namespace SocialApp.Registrars.WebApplicationBuilder;
 
 public class SwaggerRegistrar : IWebApplicationBuilderRegistrar
 {
-    public void RegisterServices(WebApplicationBuilder builder)
+    public void RegisterServices(Microsoft.AspNetCore.Builder.WebApplicationBuilder builder)
     {
         builder.Services.AddSwaggerGen();
         builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();

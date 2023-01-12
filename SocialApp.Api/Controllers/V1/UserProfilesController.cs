@@ -39,8 +39,6 @@ public class UserProfilesController : BaseController
         var command = _mapper.Map<CreateUserCommand>(profile);
         var response = await _mediator.Send(command);
         
-        
-        
         var responseProfile = _mapper.Map<UserProfileResponse>(response);
         return CreatedAtAction(nameof(GetUserProfileById), new {id = response.Id }, responseProfile);
     }

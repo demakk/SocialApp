@@ -1,4 +1,6 @@
 ﻿using SocialApp.Registrars;
+using SocialApp.Registrars.WebApplication;
+using SocialApp.Registrars.WebApplicationBuilder;
 
 namespace SocialApp.Extensions;
 

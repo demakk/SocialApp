@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc.ApiExplorer;
 
-namespace SocialApp.Registrars;
+namespace SocialApp.Registrars.WebApplication;
 
 public class MvcWebAppRegistrar : IWebApplicationRegistrar
 {
-    public void RegisterPipelineComponents(WebApplication app)
+    public void RegisterPipelineComponents(Microsoft.AspNetCore.Builder.WebApplication app)
     {
         app.UseSwagger();
         app.UseSwaggerUI(options =>

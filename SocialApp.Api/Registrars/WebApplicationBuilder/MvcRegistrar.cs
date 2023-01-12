@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 
-namespace SocialApp.Registrars;
+namespace SocialApp.Registrars.WebApplicationBuilder;
 
 public class MvcRegistrar : IWebApplicationBuilderRegistrar
 {
-    public void RegisterServices(WebApplicationBuilder builder)
+    public void RegisterServices(Microsoft.AspNetCore.Builder.WebApplicationBuilder builder)
     {
         builder.Services.AddControllers();
 
@@ -24,8 +24,6 @@ public class MvcRegistrar : IWebApplicationBuilderRegistrar
             config.GroupNameFormat = "'v'VVV";
             config.SubstituteApiVersionInUrl = true;
         });
-
-
 
         builder.Services.AddEndpointsApiExplorer();
     }
