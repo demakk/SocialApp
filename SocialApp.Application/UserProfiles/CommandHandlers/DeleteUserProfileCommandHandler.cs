@@ -1,24 +1,38 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Social.Application.Enums;
+using Social.Application.Models;
 using Social.Application.UserProfiles.Commands;
 using Social.Dal;
+using Social.Domain.Aggregates.UserProfileAggregates;
 
 namespace Social.Application.UserProfiles.CommandHandlers;
 
-public class DeleteUserProfileCommandHandler : IRequestHandler<DeleteUserProfileCommand>
+public class DeleteUserProfileCommandHandler : IRequestHandler<DeleteUserProfileCommand, OperationResult<UserProfile>>
 {
-    private DataContext _ctx;
+    private readonly DataContext _ctx;
 
     public DeleteUserProfileCommandHandler(DataContext ctx)
     {
         _ctx = ctx;
     }
-    public async Task<Unit> Handle(DeleteUserProfileCommand request, CancellationToken cancellationToken)
+    public async Task<OperationResult<UserProfile>> Handle(DeleteUserProfileCommand request, CancellationToken cancellationToken)
     {
-        var profile = await _ctx.UserProfiles.FirstOrDefaultAsync(up => up.Id == request.Id);
-
+        var result = new OperationResult<UserProfile>();
+        var profile = await _ctx.UserProfiles.FirstOrDefaultAsync(up => up.Id == request.Id, cancellationToken: cancellationToken);
+        if (profile is null)
+        {
+            result.IsError = true;
+            var error = new Error{Code = ErrorCode.NotFound,
+                Message = $"No user with profile id {request.Id} found"};
+            result.Errors.Add(error);   
+            return result;
+        }
+        
         _ctx.UserProfiles.Remove(profile);
         await _ctx.SaveChangesAsync(cancellationToken);
-        return new Unit();
+
+        result.Payload = profile;
+        return result;
     }
 }

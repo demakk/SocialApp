@@ -21,7 +21,7 @@ public class UpdateUserProfileBasicInfoCommandHandler : IRequestHandler<UpdateUs
         var result = new OperationResult<UserProfile>();
         try
         {
-            var userProfile = await _ctx.UserProfiles.FirstOrDefaultAsync(up => up.Id == request.Id);
+            var userProfile = await _ctx.UserProfiles.FirstOrDefaultAsync(up => up.Id == request.Id, cancellationToken: cancellationToken);
 
             if (userProfile is null)
             {
@@ -44,7 +44,7 @@ public class UpdateUserProfileBasicInfoCommandHandler : IRequestHandler<UpdateUs
         }
         catch (Exception e)
         {
-            var error = new Error { Code = ErrorCode.ServerError, Message = e.Message };
+            var error = new Error { Code = ErrorCode.ServerError, Message = e.Message }; 
             result.IsError = true;
             result.Errors.Add(error);
         }

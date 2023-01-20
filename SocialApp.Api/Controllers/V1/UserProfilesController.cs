@@ -1,11 +1,8 @@
 ﻿using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Razor.TagHelpers;
-using Social.Application.Enums;
 using Social.Application.UserProfiles.Commands;
 using Social.Application.UserProfiles.Queries;
-using SocialApp.Contracts.Common;
 using SocialApp.Contracts.UserProfileContracts.Requests;
 using SocialApp.Contracts.UserProfileContracts.Responses;
 
@@ -29,7 +26,7 @@ public class UserProfilesController : BaseController
     {
         var query = new GetAllUserProfiles();
         var response = await _mediator.Send(query);
-        var profiles = _mapper.Map<List<UserProfileResponse>>(response);
+        var profiles = _mapper.Map<List<UserProfileResponse>>(response.Payload);
         return Ok(profiles);
     }
 
@@ -39,8 +36,8 @@ public class UserProfilesController : BaseController
         var command = _mapper.Map<CreateUserCommand>(profile);
         var response = await _mediator.Send(command);
         
-        var responseProfile = _mapper.Map<UserProfileResponse>(response);
-        return CreatedAtAction(nameof(GetUserProfileById), new {id = response.Id }, responseProfile);
+        var responseProfile = _mapper.Map<UserProfileResponse>(response.Payload);
+        return CreatedAtAction(nameof(GetUserProfileById), new {id = responseProfile.Id}, responseProfile);
     }
 
     [HttpGet]
@@ -50,8 +47,11 @@ public class UserProfilesController : BaseController
         var query = new GetUserProfileById {Id = Guid.Parse(id)};
         var response = await _mediator.Send(query);
 
-        if (response is null) return NotFound($"No user with profile id {id} found");
-        var profile = _mapper.Map<UserProfileResponse>(response);
+        if (response.IsError)
+            return HandleErrorResponse(response.Errors);
+
+        var profile = _mapper.Map<UserProfileResponse>(response.Payload);
+        
         return Ok(profile);
     }
 
@@ -75,6 +75,6 @@ public class UserProfilesController : BaseController
             Id = Guid.Parse(id)
         };
         var response = await _mediator.Send(command);
-        return NoContent();
+        return response.IsError ? HandleErrorResponse(response.Errors) : NoContent();
     }
 }

@@ -1,12 +1,14 @@
-﻿using MediatR;
+﻿using System.Collections;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Social.Application.Models;
 using Social.Application.UserProfiles.Queries;
 using Social.Dal;
 using Social.Domain.Aggregates.UserProfileAggregates;
 
 namespace Social.Application.UserProfiles.QueryHandlers;
 
-internal class GetAllUserProfilesQueryHandler : IRequestHandler<GetAllUserProfiles, IEnumerable<UserProfile>>
+internal class GetAllUserProfilesQueryHandler : IRequestHandler<GetAllUserProfiles, OperationResult<IEnumerable<UserProfile>>>
 {
     private readonly DataContext _ctx;
 
@@ -14,8 +16,12 @@ internal class GetAllUserProfilesQueryHandler : IRequestHandler<GetAllUserProfil
     {
         _ctx = ctx;
     }
-    public async Task<IEnumerable<UserProfile>> Handle(GetAllUserProfiles request, CancellationToken cancellationToken)
+    
+    public async Task<OperationResult<IEnumerable<UserProfile>>> Handle(GetAllUserProfiles request, CancellationToken cancellationToken)
     {
-        return await _ctx.UserProfiles.ToListAsync(cancellationToken: cancellationToken);
+        var result = new OperationResult<IEnumerable<UserProfile>>();
+        var profiles = await _ctx.UserProfiles.ToListAsync(cancellationToken: cancellationToken);
+        result.Payload = profiles; 
+        return result;
     }
 }
