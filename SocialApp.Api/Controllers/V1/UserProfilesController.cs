@@ -5,6 +5,7 @@ using Social.Application.UserProfiles.Commands;
 using Social.Application.UserProfiles.Queries;
 using SocialApp.Contracts.UserProfileContracts.Requests;
 using SocialApp.Contracts.UserProfileContracts.Responses;
+using SocialApp.Filters;
 
 namespace SocialApp.Controllers.V1;
 
@@ -24,6 +25,7 @@ public class UserProfilesController : BaseController
     [HttpGet]
     public async Task<IActionResult> GetAllProfiles()
     {
+        //throw new NotImplementedException("Method not implemented");
         var query = new GetAllUserProfiles();
         var response = await _mediator.Send(query);
         var profiles = _mapper.Map<List<UserProfileResponse>>(response.Payload);
@@ -31,6 +33,7 @@ public class UserProfilesController : BaseController
     }
 
     [HttpPost]
+    [ValidateModel]
     public async Task<IActionResult> CreateUserProfile([FromBody] UserProfileCreateUpdate profile)
     {
         var command = _mapper.Map<CreateUserCommand>(profile);
@@ -57,6 +60,7 @@ public class UserProfilesController : BaseController
 
     [HttpPatch]
     [Route(ApiRoutes.UserProfiles.IdRoute)]
+    [ValidateModel]
     public async Task<IActionResult> UpdateUserProfile(string id, [FromBody] UserProfileCreateUpdate profile)
     {
         var command = _mapper.Map<UpdateUserProfileBasicInfoCommand>(profile);
@@ -68,6 +72,7 @@ public class UserProfilesController : BaseController
 
     [HttpDelete]
     [Route(ApiRoutes.UserProfiles.IdRoute)]
+    [ValidateGuid("id")]
     public async Task<IActionResult> DeleteUserProfile(string id)
     {
         var command = new DeleteUserProfileCommand
