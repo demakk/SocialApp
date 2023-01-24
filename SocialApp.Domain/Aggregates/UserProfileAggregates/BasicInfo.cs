@@ -1,4 +1,7 @@
-﻿namespace Social.Domain.Aggregates.UserProfileAggregates;
+﻿using Social.Domain.Exceptions;
+using Social.Domain.Validators.UserProfileValidators;
+
+namespace Social.Domain.Aggregates.UserProfileAggregates;
 
 public class BasicInfo
 {
@@ -17,9 +20,9 @@ public class BasicInfo
     public static BasicInfo CreateBasicInfo(string firstName, string lastName, string emailAddress, string phone,
         DateTime requestDateOfBirth, DateTime dateOfBirth, string currentCity)
     {
-        
-        //TO DO: add validation, error handling strategies, error notification
-        return new BasicInfo
+        var validator = new BasicInfoValidator();
+
+        var objToValidate = new BasicInfo
         {
             FirstName = firstName, 
             LastName = lastName, 
@@ -28,5 +31,17 @@ public class BasicInfo
             DateOfBirth = dateOfBirth,
             Phone = phone
         };
+
+        var validationResult = validator.Validate(objToValidate);
+        if (validationResult.IsValid) return objToValidate;
+
+        var exception = new UserProfileNotValidException("The user profile is not valid");
+
+        foreach (var error in validationResult.Errors)
+        {
+            exception.ValidationErrors.Add(error.ErrorMessage);
+        }
+
+        throw exception;
     }
 }

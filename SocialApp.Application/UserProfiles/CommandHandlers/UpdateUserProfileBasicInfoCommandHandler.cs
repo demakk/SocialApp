@@ -5,6 +5,7 @@ using Social.Application.Models;
 using Social.Application.UserProfiles.Commands;
 using Social.Dal;
 using Social.Domain.Aggregates.UserProfileAggregates;
+using Social.Domain.Exceptions;
 
 namespace Social.Application.UserProfiles.CommandHandlers;
 
@@ -40,6 +41,20 @@ public class UpdateUserProfileBasicInfoCommandHandler : IRequestHandler<UpdateUs
             _ctx.UserProfiles.Update(userProfile);  
             await _ctx.SaveChangesAsync(cancellationToken);
             result.Payload = userProfile;
+            return result;
+        }
+        catch (UserProfileNotValidException exception)
+        {
+            result.IsError = true;
+            exception.ValidationErrors.ForEach(e =>
+            {
+                var error = new Error
+                {
+                    Code = ErrorCode.ValidationError, Message = exception.Message
+                };
+
+                result.Errors.Add(error);
+            });
             return result;
         }
         catch (Exception e)
