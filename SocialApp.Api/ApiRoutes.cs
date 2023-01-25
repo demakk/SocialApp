@@ -11,6 +11,6 @@ public class ApiRoutes
 
     public class Post
     {
-        public const string GetById = "{id}";
+        public const string IdRoute = "{id}";
     }
 }

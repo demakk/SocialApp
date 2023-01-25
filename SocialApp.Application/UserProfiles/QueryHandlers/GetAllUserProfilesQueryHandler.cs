@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Social.Application.Enums;
 using Social.Application.Models;
 using Social.Application.UserProfiles.Queries;
 using Social.Dal;
@@ -20,8 +21,22 @@ internal class GetAllUserProfilesQueryHandler : IRequestHandler<GetAllUserProfil
     public async Task<OperationResult<IEnumerable<UserProfile>>> Handle(GetAllUserProfiles request, CancellationToken cancellationToken)
     {
         var result = new OperationResult<IEnumerable<UserProfile>>();
-        var profiles = await _ctx.UserProfiles.ToListAsync(cancellationToken: cancellationToken);
-        result.Payload = profiles; 
-        return result;
+        try
+        {
+            var profiles = await _ctx.UserProfiles.ToListAsync(cancellationToken: cancellationToken);
+            result.Payload = profiles; 
+            return result;
+        }
+        catch (Exception exception)
+        {
+            var error = new Error
+            {
+                Code = ErrorCode.UnknownError, Message = exception.Message
+            };
+            result.Errors.Add(error);
+            result.IsError = true;
+            return result;
+        }
+
     }
 }
