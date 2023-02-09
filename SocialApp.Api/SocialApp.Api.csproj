@@ -25,8 +25,4 @@
       <ProjectReference Include="..\SocialApp.Domain\SocialApp.Domain.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Contracts\Posts\Requests" />
-    </ItemGroup>
-
 </Project>

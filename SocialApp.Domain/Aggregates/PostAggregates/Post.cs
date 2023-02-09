@@ -28,6 +28,13 @@ public class Post
 
 
     //factory method
+    /// <summary>
+    /// Creates new post instance
+    /// </summary>
+    /// <param name="userProfileId">User Profile Id</param>
+    /// <param name="textContent">Post content</param>
+    /// <returns>Post</returns>
+    /// <exception cref="PostNotValidException"></exception>
     public static Post CreatePost(Guid userProfileId, string textContent)
     {
         var validator = new PostValidator();

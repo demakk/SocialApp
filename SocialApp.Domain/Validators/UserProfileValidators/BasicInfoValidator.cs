@@ -26,5 +26,7 @@ internal class BasicInfoValidator : AbstractValidator<BasicInfo>
                 new DateTime(DateTime.Now.AddYears(-18).Ticks))
             .WithMessage("Age has to be between 18 and 100");
         
+            
+        
     }
 }

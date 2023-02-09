@@ -13,11 +13,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Posts\CommandHandlers" />
-      <Folder Include="Posts\Commands" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\SocialApp.Dal\SocialApp.Dal.csproj" />
       <ProjectReference Include="..\SocialApp.Domain\SocialApp.Domain.csproj" />
     </ItemGroup>

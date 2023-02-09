@@ -50,12 +50,11 @@ public class UpdateUserProfileBasicInfoCommandHandler : IRequestHandler<UpdateUs
             {
                 var error = new Error
                 {
-                    Code = ErrorCode.ValidationError, Message = exception.Message
+                    Code = ErrorCode.ValidationError, Message = e
                 };
 
                 result.Errors.Add(error);
             });
-            return result;
         }
         catch (Exception e)
         {

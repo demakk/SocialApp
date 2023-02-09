@@ -40,7 +40,7 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Opera
             {
                 var error = new Error
                 {
-                    Code = ErrorCode.ValidationError, Message = exception.Message
+                    Code = ErrorCode.ValidationError, Message = e
                 };
 
                 result.Errors.Add(error);
