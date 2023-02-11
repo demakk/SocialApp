@@ -9,5 +9,6 @@ public class PostMaps : Profile
     public PostMaps()
     {
         CreateMap<Post, PostResponse>();
+        CreateMap<PostComment, PostCommentResponse>();
     }
 }
