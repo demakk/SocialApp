@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Social.Dal;
 
 namespace SocialApp.Registrars.WebApplicationBuilder;
@@ -9,5 +10,8 @@ public class DbRegistrar : IWebApplicationBuilderRegistrar
     {
         var cs = builder.Configuration.GetConnectionString("Default");
         builder.Services.AddDbContext<DataContext>(options => { options.UseSqlServer(cs);});
+
+        builder.Services.AddIdentityCore<IdentityUser>()
+            .AddEntityFrameworkStores<DataContext>();
     }
 }
