@@ -34,7 +34,7 @@ public class UpdateUserProfileBasicInfoCommandHandler : IRequestHandler<UpdateUs
             }
 
             var basicInfo = BasicInfo.CreateBasicInfo(request.FirstName, request.LastName, request.EmailAddress,
-                request.Phone, request.DateOfBirth, request.DateOfBirth, request.CurrentCity);
+                request.Phone, request.DateOfBirth, request.CurrentCity);
         
             userProfile.UpdateBasicInfo(basicInfo);
 

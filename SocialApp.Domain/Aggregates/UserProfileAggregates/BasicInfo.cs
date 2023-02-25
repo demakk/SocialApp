@@ -18,7 +18,7 @@ public class BasicInfo
 
     //factory method
     public static BasicInfo CreateBasicInfo(string firstName, string lastName, string emailAddress, string phone,
-        DateTime requestDateOfBirth, DateTime dateOfBirth, string currentCity)
+         DateTime dateOfBirth, string currentCity)
     {
         var validator = new BasicInfoValidator();
 
