@@ -30,10 +30,19 @@ public class UpdatePostTextCommandHandler : IRequestHandler<UpdatePostTextComman
                 result.IsError = true;
                 var error = new Error{Code = ErrorCode.NotFound,
                     Message = $"No post with id {request.PostId} found"};
-                result.Errors.Add(error);   
+                result.Errors.Add(error);
                 return result;
             }
-            
+
+            if (post.UserProfileId != request.UserProfileId)
+            {
+                result.IsError = true;
+                var error = new Error{Code = ErrorCode.PostUpdateNotPossible,
+                    Message = $"Impossible to update the post because it's not the post owner that initiates the update"};
+                result.Errors.Add(error);
+                return result;
+            }
+
             post.UpdatePostText(request.NewTextContent);
             _ctx.Posts.Update(post);
             await _ctx.SaveChangesAsync();

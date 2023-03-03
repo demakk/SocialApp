@@ -44,10 +44,10 @@ public class BaseController : ControllerBase
         apiError = new ErrorResponse
         {
             Timestamp = DateTime.Now,
-            StatusPhrase = "Internal server error",
-            StatusCode = 500,
+            StatusPhrase = "Bad request",
+            StatusCode = 400,
         };
-        apiError.Errors.Add("Unknown error");
-        return StatusCode(500, apiError);
+        errors.ForEach(e => apiError.Errors.Add(e.Message));
+        return StatusCode(400, apiError);
         }
 }

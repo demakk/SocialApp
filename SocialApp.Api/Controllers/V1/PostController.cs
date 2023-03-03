@@ -1,7 +1,9 @@
-﻿using AutoMapper;
+﻿using System.Security.Claims;
+using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Social.Application.Posts.CommandHandlers;
 using Social.Application.Posts.Commands;
 using Social.Application.Posts.Queries;
 using SocialApp.Contracts.Common;
@@ -15,7 +17,7 @@ namespace SocialApp.Controllers.V1;
 [ApiVersion("1.0")]
 [Route(ApiRoutes.BaseRoute)]
 [ApiController]
-
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class PostController : BaseController
 {
     private readonly IMapper _mapper;
@@ -52,9 +54,12 @@ public class PostController : BaseController
     [ValidateModel]
     public async Task<IActionResult> CreatePost([FromBody] PostCreate post)
     {
+
+        var userProfileId = HttpContext.GetUserProfileIdClaimValue();
+        
         var command = new CreatePostCommand
         {
-            UserProfileId = post.UserProfileId,
+            UserProfileId = userProfileId,
             TextContent = post.TextContent
         };
 
@@ -73,10 +78,14 @@ public class PostController : BaseController
     [ValidateModel]
     public async Task<IActionResult> UpdatePost(string id, [FromBody] PostUpdate post)
     {
+        
+        var userProfileId = HttpContext.GetUserProfileIdClaimValue();
+        
         var command = new UpdatePostTextCommand
         {
             PostId = Guid.Parse(id),
-            NewTextContent = post.TextContent
+            NewTextContent = post.TextContent,
+            UserProfileId = userProfileId
         };
 
         var response = await _mediator.Send(command);
@@ -89,9 +98,11 @@ public class PostController : BaseController
     [ValidateGuid("id")]
     public async Task<IActionResult> DeletePost(string id)
     {
+        var userProfileId = HttpContext.GetUserProfileIdClaimValue();
         var command = new DeletePostCommand
         {
-            PostId = Guid.Parse(id)
+            PostId = Guid.Parse(id),
+            UserProfileId = userProfileId
         };
 
         var response = await _mediator.Send(command);

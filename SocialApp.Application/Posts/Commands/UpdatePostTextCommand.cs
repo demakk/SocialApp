@@ -8,4 +8,6 @@ public class UpdatePostTextCommand : IRequest<OperationResult<Post>>
 {
     public string NewTextContent { get; set; }
     public Guid PostId { get; set; }
+
+    public Guid UserProfileId { get; set; }
 }
