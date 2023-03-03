@@ -1,0 +1,10 @@
+﻿using Microsoft.IdentityModel.Tokens;
+
+namespace Social.Application.Options;
+
+public class JwtSettings
+{
+    public string SigningKey { get; set; }
+    public  string  Issuer { get; set; }
+    public string[] Audiences { get; set; }
+}
