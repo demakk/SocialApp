@@ -34,21 +34,7 @@ public class UserProfilesController : BaseController
         var profiles = _mapper.Map<List<UserProfileResponse>>(response.Payload);
         return Ok(profiles);
     }
-
-    [HttpPost]
-    [ValidateModel]
-    public async Task<IActionResult> CreateUserProfile([FromBody] UserProfileCreateUpdate profile)
-    {
-        var command = _mapper.Map<CreateUserCommand>(profile);
-        var response = await _mediator.Send(command);
-        
-        var responseProfile = _mapper.Map<UserProfileResponse>(response.Payload);
-        
-        return response.IsError ? HandleErrorResponse(response.Errors) : 
-            CreatedAtAction(nameof(GetUserProfileById),
-                new {id = responseProfile.Id}, responseProfile);
-    }
-
+    
     [HttpGet]
     [Route(ApiRoutes.UserProfiles.IdRoute)]
     public async Task<IActionResult> GetUserProfileById(string id)
@@ -76,6 +62,8 @@ public class UserProfilesController : BaseController
         return response.IsError ? HandleErrorResponse(response.Errors) : NoContent();
     }
 
+    
+    //Perhaps should be deleted, because the process have to go through Identity Controller
     [HttpDelete]
     [Route(ApiRoutes.UserProfiles.IdRoute)]
     [ValidateGuid("id")]
