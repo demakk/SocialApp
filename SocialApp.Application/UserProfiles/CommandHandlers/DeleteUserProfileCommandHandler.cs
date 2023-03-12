@@ -24,10 +24,8 @@ public class DeleteUserProfileCommandHandler : IRequestHandler<DeleteUserProfile
             var profile = await _ctx.UserProfiles.FirstOrDefaultAsync(up => up.Id == request.Id, cancellationToken: cancellationToken);
             if (profile is null)
             {
-                result.IsError = true;
-                var error = new Error{Code = ErrorCode.NotFound,
-                    Message = $"No user with profile id {request.Id} found"};
-                result.Errors.Add(error);   
+                result.AddError(ErrorCode.NotFound,
+                    string.Format(UserProfilesErrorMessages.UserProfileNotFound, request.Id));
                 return result;
             }
         
@@ -35,18 +33,11 @@ public class DeleteUserProfileCommandHandler : IRequestHandler<DeleteUserProfile
             await _ctx.SaveChangesAsync(cancellationToken);
 
             result.Payload = profile;
-            return result;
         }
         catch (Exception exception)
         {
-            var error = new Error
-            {
-                Code = ErrorCode.UnknownError, Message = exception.Message
-            };
-            result.Errors.Add(error);
-            result.IsError = true;
-            return result;
+            result.AddUnknownError(exception.Message);
         }
-
+        return result;
     }
 }

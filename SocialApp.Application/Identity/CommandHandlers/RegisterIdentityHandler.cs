@@ -47,12 +47,12 @@ public class RegisterIdentityHandler : IRequestHandler<RegisterIdentity, Operati
 
              await using var transaction = await _ctx.Database.BeginTransactionAsync(cancellationToken);
 
-            var userCreationSuccessful = await CreateIdentityUserAsync(result, identity, request, transaction);
+            var userCreationSuccessful = await CreateIdentityUserAsync(result, identity, request, transaction, cancellationToken);
 
             if (!userCreationSuccessful) return result;
             
-            var profile = await CreateUserProfileAsync(identity, request, transaction);
-            await transaction.CommitAsync();
+            var profile = await CreateUserProfileAsync(identity, request, transaction, cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
             
             result.Payload = GetJwtString(identity, profile);
             return result;
@@ -60,27 +60,11 @@ public class RegisterIdentityHandler : IRequestHandler<RegisterIdentity, Operati
         }
         catch (UserProfileNotValidException exception)
         {
-            result.IsError = true;
-            exception.ValidationErrors.ForEach(e =>
-            {
-                var error = new Error
-                {
-                    Code = ErrorCode.ValidationError, Message = e
-                };
-
-                result.Errors.Add(error);
-            });
+            exception.ValidationErrors.ForEach(e => { result.AddError(ErrorCode.ValidationError, e); });
         }
         catch (Exception e)
         {
-            result.IsError = true;
-
-            var error = new Error
-            {
-                Code = ErrorCode.UnknownError,
-                Message = e.Message
-            };
-            result.Errors.Add(error);
+            result.AddUnknownError(e.Message);
         }
 
         return result;
@@ -90,47 +74,27 @@ public class RegisterIdentityHandler : IRequestHandler<RegisterIdentity, Operati
         RegisterIdentity request)
     {
         var existingIdentity = await _userManager.FindByEmailAsync(request.Username);
-        if (existingIdentity != null)
-        {
-            result.IsError = true;
-            var error = new Error
-            {
-                Code = ErrorCode.IdentityUserAlreadyExists,
-                Message = $"Provided address {request.Username} already exists. Cannot register new user"
-            };
-            result.Errors.Add(error);
-            return false;
-        }
-
-        return true;
+        if (existingIdentity == null) return true;
+        result.AddError(ErrorCode.IdentityUserAlreadyExists, IdentityErrorMessages.IdentityUserAlreadyExists);
+        return false;
     }
 
-    private async Task<bool> CreateIdentityUserAsync(OperationResult<string> result,
-        IdentityUser identity, RegisterIdentity request, IDbContextTransaction transaction)
+    private async Task<bool> CreateIdentityUserAsync(OperationResult<string> result, IdentityUser identity,
+        RegisterIdentity request, IDbContextTransaction transaction, CancellationToken cancellationToken)
     {
         var identityResult = await _userManager.CreateAsync(identity, request.Password);
-        if (!identityResult.Succeeded)
+        if (identityResult.Succeeded) return true;
+        
+        foreach (var identityError in identityResult.Errors)
         {
-                
-            foreach (var identityError in identityResult.Errors)
-            {
-                result.IsError = true;
-                var error = new Error
-                {
-                    Code = ErrorCode.IdentityCreationFailed,
-                    Message = identityError.Description
-                };
-                result.Errors.Add(error);
-                await transaction.RollbackAsync();
-            }
-
-            return false;
+            result.AddError(ErrorCode.IdentityCreationFailed, identityError.Description);
         }
-        return true;
+        await transaction.RollbackAsync(cancellationToken);
+        return false;
     }
 
     private async Task<UserProfile> CreateUserProfileAsync(IdentityUser identity, RegisterIdentity request,
-        IDbContextTransaction transaction)
+        IDbContextTransaction transaction, CancellationToken cancellationToken)
     {
         
         try
@@ -140,12 +104,12 @@ public class RegisterIdentityHandler : IRequestHandler<RegisterIdentity, Operati
 
             var profile = UserProfile.CreateUserProfile(identity.Id, profileInfo);
             _ctx.UserProfiles.Add(profile);
-            await _ctx.SaveChangesAsync();
+            await _ctx.SaveChangesAsync(cancellationToken);
             return profile;
         }
-        catch (Exception e)
+        catch
         {
-            await transaction.RollbackAsync();
+            await transaction.RollbackAsync(cancellationToken);
             throw;
         }
     }

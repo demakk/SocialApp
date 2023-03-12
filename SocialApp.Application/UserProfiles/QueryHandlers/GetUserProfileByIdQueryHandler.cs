@@ -24,10 +24,8 @@ internal class GetUserProfileByIdQueryHandler : IRequestHandler<GetUserProfileBy
             var profile = await _ctx.UserProfiles.FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken: cancellationToken);
             if (profile is null)
             {
-                result.IsError = true;
-                var error = new Error{Code = ErrorCode.NotFound,
-                    Message = $"No user with profile id {request.Id} found"};
-                result.Errors.Add(error);   
+                result.AddError(ErrorCode.NotFound,
+                    string.Format(UserProfilesErrorMessages.UserProfileNotFound, request.Id));
                 return result;
             }
 
@@ -36,12 +34,7 @@ internal class GetUserProfileByIdQueryHandler : IRequestHandler<GetUserProfileBy
         }
         catch (Exception exception)
         {
-            var error = new Error
-            {
-                Code = ErrorCode.UnknownError, Message = exception.Message
-            };
-            result.Errors.Add(error);
-            result.IsError = true;
+            result.AddUnknownError(exception.Message);
             return result;
         }
     }

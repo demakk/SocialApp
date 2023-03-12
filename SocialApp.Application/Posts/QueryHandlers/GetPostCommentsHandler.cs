@@ -29,10 +29,8 @@ public class GetPostCommentsHandler : IRequestHandler<GetAllComments, OperationR
             
             if (post is null)
             {
-                result.IsError = true;
-                var error = new Error{Code = ErrorCode.NotFound,
-                    Message = $"No post id {request.PostId} found"};
-                result.Errors.Add(error);   
+                result.AddError(ErrorCode.NotFound,
+                    string.Format(PostErrorMessages.PostNotFound, request.PostId));
                 return result;
             }
             
@@ -40,12 +38,7 @@ public class GetPostCommentsHandler : IRequestHandler<GetAllComments, OperationR
         }
         catch (Exception exception)
         {
-            var error = new Error
-            {
-                Code = ErrorCode.UnknownError, Message = exception.Message
-            };
-            result.Errors.Add(error);
-            result.IsError = true;
+            result.AddUnknownError(exception.Message);
         }
 
         return result;

@@ -12,10 +12,12 @@ public enum ErrorCode
     IdentityUserAlreadyExists = 201, 
     IdentityCreationFailed = 202,
     IdentityDoesNotExist = 203,
+    IncorrectPassword = 204,
     
     //Application errors should be in the range 301-399
     PostUpdateNotPossible = 301,
     PostDeleteNotPossible = 302,
+    
         
     UnknownError = 1001
 }

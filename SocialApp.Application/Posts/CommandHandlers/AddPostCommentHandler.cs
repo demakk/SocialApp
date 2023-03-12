@@ -22,16 +22,11 @@ public class AddPostCommentHandler : IRequestHandler<AddPostComment, OperationRe
         var result = new OperationResult<PostComment>();
         try
         {
-            var post = await _ctx.Posts.FirstOrDefaultAsync(p => p.PostId == request.PostId);
+            var post = await _ctx.Posts.FirstOrDefaultAsync(p => p.PostId == request.PostId, cancellationToken: cancellationToken);
             if (post is null)
             {
-                result.IsError = true;
-                var error = new Error
-                {
-                    Code = ErrorCode.NotFound,
-                    Message = $"No post id {request.PostId} found"
-                };
-                result.Errors.Add(error);
+                result.AddError(ErrorCode.NotFound,
+                    string.Format(PostErrorMessages.PostNotFound, request.PostId));
                 return result;
             }
 
@@ -40,33 +35,17 @@ public class AddPostCommentHandler : IRequestHandler<AddPostComment, OperationRe
             
             post.AddPostComment(comment);
             _ctx.Posts.Update(post);
-            await _ctx.SaveChangesAsync();
+            await _ctx.SaveChangesAsync(cancellationToken);
 
             result.Payload = comment;
         }
         catch (PostCommentNotValidException exception)
         {
-            result.IsError = true;
-            exception.ValidationErrors.ForEach(e =>
-            {
-                var error = new Error
-                {
-                    Code = ErrorCode.ValidationError, Message = e
-                };
-
-                result.Errors.Add(error);
-            });
+            exception.ValidationErrors.ForEach(e => result.AddError(ErrorCode.ValidationError, e));
         }
         catch (Exception e)
         {
-            result.IsError = true;
-
-            var error = new Error
-            {
-                Code = ErrorCode.UnknownError,
-                Message = e.Message
-            };
-            result.Errors.Add(error);
+            result.AddUnknownError(e.Message);
         }
 
         return result;

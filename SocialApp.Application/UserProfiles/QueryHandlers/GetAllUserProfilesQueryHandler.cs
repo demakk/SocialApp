@@ -24,19 +24,13 @@ internal class GetAllUserProfilesQueryHandler : IRequestHandler<GetAllUserProfil
         try
         {
             var profiles = await _ctx.UserProfiles.ToListAsync(cancellationToken: cancellationToken);
-            result.Payload = profiles; 
-            return result;
+            result.Payload = profiles;
         }
         catch (Exception exception)
         {
-            var error = new Error
-            {
-                Code = ErrorCode.UnknownError, Message = exception.Message
-            };
-            result.Errors.Add(error);
-            result.IsError = true;
-            return result;
+            result.AddUnknownError(exception.Message);
         }
 
+        return result;
     }
 }

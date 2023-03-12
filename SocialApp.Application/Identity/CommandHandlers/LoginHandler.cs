@@ -43,21 +43,14 @@ public class LoginHandler : IRequestHandler<LoginCommand, OperationResult<string
             if (!validationResult) return result;
             
             var profile = await _ctx.UserProfiles
-                .FirstOrDefaultAsync(i => i.IdentityId == identity.Id);
+                .FirstOrDefaultAsync(i => i.IdentityId == identity.Id, cancellationToken);
             
             result.Payload = GetJwtString(identity, profile);
             return result;
         }
         catch (Exception e)
         {
-            result.IsError = true;
-
-            var error = new Error
-            {
-                Code = ErrorCode.UnknownError,
-                Message = e.Message
-            };
-            result.Errors.Add(error);
+            result.AddError(ErrorCode.UnknownError, e.Message);
         }
 
         return result;
@@ -68,13 +61,7 @@ public class LoginHandler : IRequestHandler<LoginCommand, OperationResult<string
     {
         if (identity is null)
         {
-            result.IsError = true;
-            var error = new Error
-            {
-                Code = ErrorCode.IdentityDoesNotExist,
-                Message = $"Provided email address {request.Username} does not exist."
-            };
-            result.Errors.Add(error);
+            result.AddError(ErrorCode.IdentityDoesNotExist, IdentityErrorMessages.NonExistentIdentityUser);
             return false;
         }
 
@@ -92,16 +79,8 @@ public class LoginHandler : IRequestHandler<LoginCommand, OperationResult<string
         }*/
 
         if (validPassword) return true;
-        {
-            result.IsError = true;
-            var error = new Error
-            {
-                Code = ErrorCode.IdentityDoesNotExist,
-                Message = "Provided password is incorrect"
-            };
-            result.Errors.Add(error);
-            return false;
-        }
+        result.AddError(ErrorCode.IncorrectPassword, IdentityErrorMessages.IncorrectPassword);
+        return false;
     }
     
     private string GetJwtString(IdentityUser identity, UserProfile profile)

@@ -24,42 +24,29 @@ public class UpdatePostTextCommandHandler : IRequestHandler<UpdatePostTextComman
 
         try
         {
-            var post = await _ctx.Posts.FirstOrDefaultAsync(p => p.PostId == request.PostId);
+            var post = await _ctx.Posts.FirstOrDefaultAsync(p => p.PostId == request.PostId, cancellationToken: cancellationToken);
             if (post is null)
             {
-                result.IsError = true;
-                var error = new Error{Code = ErrorCode.NotFound,
-                    Message = $"No post with id {request.PostId} found"};
-                result.Errors.Add(error);
+                result.AddError(ErrorCode.NotFound,
+                    string.Format(PostErrorMessages.PostNotFound, request.PostId));
                 return result;
             }
 
             if (post.UserProfileId != request.UserProfileId)
             {
-                result.IsError = true;
-                var error = new Error{Code = ErrorCode.PostUpdateNotPossible,
-                    Message = $"Impossible to update the post because it's not the post owner that initiates the update"};
-                result.Errors.Add(error);
+                result.AddError(ErrorCode.PostUpdateNotPossible, PostErrorMessages.PostUpdateNotPossible);
                 return result;
             }
 
             post.UpdatePostText(request.NewTextContent);
             _ctx.Posts.Update(post);
-            await _ctx.SaveChangesAsync();
+            await _ctx.SaveChangesAsync(cancellationToken);
             result.Payload = post;
         }
         catch (Exception e)
         {
-            result.IsError = true;
-            
-            var error = new Error
-            {
-                Code = ErrorCode.UnknownError,
-                Message = e.Message
-            };
-            result.Errors.Add(error);
+            result.AddUnknownError(e.Message);
         }
-
         return result;
     }
 }

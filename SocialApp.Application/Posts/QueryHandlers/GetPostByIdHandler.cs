@@ -27,22 +27,15 @@ public class GetPostByIdHandler : IRequestHandler<GetPostById, OperationResult<P
                 .FirstOrDefaultAsync(post => post.PostId == request.Id, cancellationToken: cancellationToken);
             if (post is null)
             {
-                result.IsError = true;
-                var error = new Error{Code = ErrorCode.NotFound,
-                    Message = $"No post with profile id {request.Id} found"};
-                result.Errors.Add(error);   
+                result.AddError(ErrorCode.NotFound,
+                    string.Format(PostErrorMessages.PostNotFound, request.Id));
                 return result;
             }
             result.Payload = post;
         }
         catch (Exception exception)
         {
-            var error = new Error
-            {
-                Code = ErrorCode.UnknownError, Message = exception.Message
-            };
-            result.Errors.Add(error);
-            result.IsError = true;
+            result.AddUnknownError(exception.Message);
         }
         return result;
     }

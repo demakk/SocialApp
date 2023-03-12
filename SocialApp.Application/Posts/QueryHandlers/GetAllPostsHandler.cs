@@ -27,12 +27,7 @@ public class GetAllPostsHandler : IRequestHandler<GetAllPosts, OperationResult<L
         }
         catch (Exception exception)
         {
-            var error = new Error
-            {
-                Code = ErrorCode.UnknownError, Message = exception.Message
-            };
-            result.Errors.Add(error);
-            result.IsError = true;
+            result.AddUnknownError(exception.Message);
         }
         
         return result;
