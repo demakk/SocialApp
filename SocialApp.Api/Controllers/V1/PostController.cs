@@ -163,4 +163,44 @@ public class PostController : BaseController
         return Ok(mappedComment);
     }
 
+    [HttpGet]
+    [Route(ApiRoutes.Post.PostInteractions)]
+    [ValidateGuid("postId")]
+    public async Task<IActionResult> GetPostInteractions(string postId, CancellationToken cancellationToken)
+    {
+        var id = Guid.Parse(postId);
+
+        var query = new GetPostInteractions {PostId = id};
+
+        var response = await _mediator.Send(query, cancellationToken);
+
+        var mapped = _mapper.Map<List<PostInteractionResponse>>(response.Payload);
+        
+        return response.IsError ? HandleErrorResponse(response.Errors) : Ok(mapped);
+    }
+
+    [HttpPost]
+    [Route(ApiRoutes.Post.PostInteractions)]
+    [ValidateGuid("postId")]
+    [ValidateModel]
+    public async Task<IActionResult> AddPostInteraction(string postId,
+        [FromBody] PostInteractionCreate interaction, CancellationToken cancellationToken)
+    {
+        var id = Guid.Parse(postId);
+        var userProfileId = HttpContext.GetUserProfileIdClaimValue();
+
+        var command = new AddPostInteraction
+        {
+            UserProfileId = userProfileId,
+            PostId = id,
+            InteractionType = interaction.InteractionType
+        };
+
+        var response = await _mediator.Send(command, cancellationToken);
+
+        var mapped = _mapper.Map<PostInteractionResponse>(response.Payload);
+        
+        return response.IsError ? HandleErrorResponse(response.Errors) : Ok(mapped);
+    }
+
 }

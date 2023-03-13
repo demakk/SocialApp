@@ -4,7 +4,7 @@ public enum InteractionType
 {
     Like,
     Dislike,
-    Wow, 
+    Wow,    
     Haha,
     Love, 
     Angry,

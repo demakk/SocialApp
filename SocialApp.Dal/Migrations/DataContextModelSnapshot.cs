@@ -253,9 +253,14 @@ namespace Social.Dal.Migrations
                     b.Property<Guid>("PostId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("UserProfileId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("PostId");
+
+                    b.HasIndex("UserProfileId");
 
                     b.ToTable("PostInteraction");
                 });
@@ -308,6 +313,12 @@ namespace Social.Dal.Migrations
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Social.Domain.Aggregates.UserProfileAggregates.UserProfile", "UserProfile")
+                        .WithMany()
+                        .HasForeignKey("UserProfileId");
+
+                    b.Navigation("UserProfile");
                 });
 
             modelBuilder.Entity("Social.Domain.Aggregates.UserProfileAggregates.UserProfile", b =>
