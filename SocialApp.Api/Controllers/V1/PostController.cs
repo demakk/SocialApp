@@ -133,20 +133,7 @@ public class PostController : BaseController
     [HttpPost]
     public async Task<IActionResult> AddPostComment(string postId, [FromBody] PostCommentCreate comment)
     {
-        var isValidGuid = Guid.TryParse(comment.UserProfileId, out var userProfileId);
-
-        if (!isValidGuid)
-        {
-
-            var apiError = new ErrorResponse
-            {
-                Timestamp = DateTime.Now,
-                StatusPhrase = "Bad Request",
-                StatusCode = 400,
-            };
-            apiError.Errors.Add("The provided id is not in the correct Guid format");
-            return BadRequest();
-        }
+        var userProfileId = HttpContext.GetUserProfileIdClaimValue();
 
         var command = new AddPostComment
         {
@@ -161,6 +148,52 @@ public class PostController : BaseController
         var mappedComment = _mapper.Map<PostCommentResponse>(response.Payload);
         
         return Ok(mappedComment);
+    }
+
+    
+    [HttpPut]
+    [Route(ApiRoutes.Post.CommentById)]
+    [ValidateGuid("postId", "commentId")]
+    [ValidateModel]
+    public async Task<IActionResult> UpdatePostComment(string postId, string commentId,
+        [FromBody] PostCommentUpdate comment, CancellationToken cancellationToken)
+    {
+        var userProfileId = HttpContext.GetUserProfileIdClaimValue();
+        var command = new UpdatePostCommentCommand
+        {
+            UserProfileId = userProfileId,
+            CommentId = Guid.Parse(commentId),
+            PostId = Guid.Parse(postId),
+            Text = comment.Text
+        };
+
+        var response = await _mediator.Send(command, cancellationToken);
+
+        if (response.IsError) return HandleErrorResponse(response.Errors);
+
+        return NoContent();
+    }
+
+    [HttpDelete]
+    [Route(ApiRoutes.Post.CommentById)]
+    [ValidateGuid("postId", "commentId")]
+    [ValidateModel]
+    public async Task<IActionResult> RemoveCommentFromPost(string postId, string commentId,
+        CancellationToken cancellationToken)
+    {
+        var userProfileId = HttpContext.GetUserProfileIdClaimValue();
+        var command = new DeletePostCommentCommand
+        {
+            UserProfileId = userProfileId,
+            CommentId = Guid.Parse(commentId),
+            PostId = Guid.Parse(postId)
+        };
+
+        var response = await _mediator.Send(command, cancellationToken);
+
+        if (response.IsError) HandleErrorResponse(response.Errors);
+        
+        return NoContent();
     }
 
     [HttpGet]
@@ -201,6 +234,29 @@ public class PostController : BaseController
         var mapped = _mapper.Map<PostInteractionResponse>(response.Payload);
         
         return response.IsError ? HandleErrorResponse(response.Errors) : Ok(mapped);
+    }
+
+
+    [HttpDelete]
+    [Route(ApiRoutes.Post.InteractionById)]
+    [ValidateGuid("postId", "interactionId")]
+    public async Task<IActionResult> RemovePostInteraction(string postId, string interactionId,
+        CancellationToken cancellationToken)
+    {
+        var command = new DeletePostInteraction
+        {
+            PostId = Guid.Parse(postId),
+            PostInteractionId = Guid.Parse(interactionId),
+            UserProfileId = HttpContext.GetUserProfileIdClaimValue()
+        };
+
+        var response = await _mediator.Send(command, cancellationToken);
+
+        if (response.IsError) return HandleErrorResponse(response.Errors);
+
+        var mapped = _mapper.Map<PostInteractionResponse>(response.Payload);
+
+        return Ok(mapped);
     }
 
 }

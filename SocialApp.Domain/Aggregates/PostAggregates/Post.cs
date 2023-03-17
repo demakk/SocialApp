@@ -90,6 +90,15 @@ public class Post
         _comments.Remove(toRemove);
     }
 
+    public void UpdatePostComment(Guid postCommentId, string text)
+    {
+        var comment = _comments.FirstOrDefault(c => c.Id == postCommentId);
+        if (comment is not null && !string.IsNullOrWhiteSpace(text))
+        {
+            comment.UpdateCommentText(text);
+        }
+    }
+
     public void AddInteraction(PostInteraction newInteraction)
     {
         _interactions.Add(newInteraction);

@@ -9,14 +9,18 @@ public enum ErrorCode
     ValidationError = 101,
     
     //Infrastructure errors should be in the range 200-299
-    IdentityUserAlreadyExists = 201, 
     IdentityCreationFailed = 202,
-    IdentityDoesNotExist = 203,
-    IncorrectPassword = 204,
+
     
     //Application errors should be in the range 301-399
     PostUpdateNotPossible = 301,
     PostDeleteNotPossible = 302,
+    InteractionRemovalNotAuthorized = 303,
+    IdentityDoesNotExist = 304,
+    IncorrectPassword = 305,
+    IdentityUserAlreadyExists = 306,
+    UnauthorizedAccountRemoval = 307,
+    UnauthorizedCommentRemoval = 308,
     
         
     UnknownError = 1001

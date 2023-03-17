@@ -61,19 +61,5 @@ public class UserProfilesController : BaseController
 
         return response.IsError ? HandleErrorResponse(response.Errors) : NoContent();
     }
-
     
-    //Perhaps should be deleted, because the process have to go through Identity Controller
-    [HttpDelete]
-    [Route(ApiRoutes.UserProfiles.IdRoute)]
-    [ValidateGuid("id")]
-    public async Task<IActionResult> DeleteUserProfile(string id)
-    {
-        var command = new DeleteUserProfileCommand
-        {
-            Id = Guid.Parse(id)
-        };
-        var response = await _mediator.Send(command);
-        return response.IsError ? HandleErrorResponse(response.Errors) : NoContent();
-    }
 }

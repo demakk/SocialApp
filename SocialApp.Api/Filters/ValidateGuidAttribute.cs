@@ -6,29 +6,36 @@ namespace SocialApp.Filters;
 
 public class ValidateGuidAttribute : ActionFilterAttribute
 {
-    private readonly string _key;
+    private readonly List<string> _keys;
 
-    public ValidateGuidAttribute(string key)
+    public ValidateGuidAttribute(params string[] keys)
     {
-        _key = key;
+        _keys = keys.ToList();
     }
-    
+
     public override void OnActionExecuting(ActionExecutingContext context)
     {
-        if (!context.ActionArguments.TryGetValue(_key, out var value)) return;
+        var hasError = false;
 
-        if (Guid.TryParse(value?.ToString(), out _)) return;
-        
-        var apiError = new ErrorResponse
+        var apiError = new ErrorResponse();
+        _keys.ForEach(k =>
         {
-            Timestamp = DateTime.Now,
-            StatusPhrase = "Bad request",
-            StatusCode = 400,
-        };
+            if (!context.ActionArguments.TryGetValue(k, out var value) ||
+                !Guid.TryParse(value?.ToString(), out _)) hasError = true;
+
+
+            if (hasError)
+            {
+                apiError.Errors.Add($"The identifier for {k} is not a correct GUID format");
+            }
+        });
+
+        if (!hasError) return;
         
-        apiError.Errors.Add($"The identifier for {_key} is not a correct GUID format");
-        context.Result = new JsonResult(apiError) { StatusCode = 400 };
+        apiError.StatusCode = 400;
+        apiError.StatusPhrase = "Bad Request";
+        apiError.Timestamp = DateTime.Now;
+
+        context.Result = new JsonResult(apiError){StatusCode = 400};
     }
-    
-    
 }
